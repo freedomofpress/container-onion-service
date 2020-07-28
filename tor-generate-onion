@@ -1,0 +1,40 @@
+#!/bin/bash
+# Utility script to generate a Tor v3 Onion Service,
+# print its config (i.e. hostname & keypair) to stdout
+
+set -e
+set -u
+set -o pipefail
+
+
+tmp_torrc="$(mktemp)"
+onion_dir="/var/lib/tor/onion"
+cat <<EOF > "$tmp_torrc"
+HiddenServiceDir $onion_dir
+HiddenServicePort 1234 127.0.0.1:1234
+EOF
+
+
+function wait_for_file() {
+    local f
+    f="$1"
+    shift
+    while ! test -f "$f"; do
+        sleep 1
+    done
+}
+
+# Start tor service, backgrounded, then wait for conf files.
+# The tor process will create the necessary files when it starts.
+nohup tor -f "$tmp_torrc" --hush > /dev/null 2>&1 &
+
+for tor_file in hostname hs_ed25519_public_key hs_ed25519_secret_key ; do
+    f="${onion_dir}/${tor_file}"
+    wait_for_file "$f"
+done
+
+cat <<EOF
+Hostname: $(cat "${onion_dir}/hostname")
+Public key: $(cat "${onion_dir}/hs_ed25519_public_key" | base64 -w 0)
+Private key: "$(cat "${onion_dir}/hs_ed25519_secret_key" | base64 -w 0)
+EOF
