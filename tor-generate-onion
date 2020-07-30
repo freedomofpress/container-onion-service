@@ -1,7 +1,7 @@
 #!/bin/bash
 # Utility script to generate a Tor v3 Onion Service,
-# print its config (i.e. hostname & keypair) to stdout
-
+# print its config (i.e. hostname & keypair) to stdout as JSON.
+# Intended for use in a container image.
 set -e
 set -u
 set -o pipefail
@@ -33,8 +33,12 @@ for tor_file in hostname hs_ed25519_public_key hs_ed25519_secret_key ; do
     wait_for_file "$f"
 done
 
+# Dump report to stdout. An exquisite punishment awaits those
+# who write JSON from bash.
 cat <<EOF
-Hostname: $(cat "${onion_dir}/hostname")
-Public key: $(cat "${onion_dir}/hs_ed25519_public_key" | base64 -w 0)
-Private key: "$(cat "${onion_dir}/hs_ed25519_secret_key" | base64 -w 0)
+{
+  "onion_hostname": "$(cat "${onion_dir}/hostname")",
+  "onion_pubkey": "$(cat "${onion_dir}/hs_ed25519_public_key" | base64 -w 0)",
+  "onion_privkey": "$(cat "${onion_dir}/hs_ed25519_secret_key" | base64 -w 0)"
+}
 EOF
