@@ -36,5 +36,5 @@ done
 cat <<EOF
 Hostname: $(cat "${onion_dir}/hostname")
 Public key: $(cat "${onion_dir}/hs_ed25519_public_key" | base64 -w 0)
-Private key: "$(cat "${onion_dir}/hs_ed25519_secret_key" | base64 -w 0)
+Private key: $(cat "${onion_dir}/hs_ed25519_secret_key" | base64 -w 0)
 EOF
