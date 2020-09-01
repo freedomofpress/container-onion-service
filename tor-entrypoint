@@ -12,6 +12,7 @@ TOR_ONION_V3_PUBLIC_KEY="${TOR_ONION_V3_PUBLIC_KEY:-}"
 TOR_ONION_V3_SECRET_KEY="${TOR_ONION_V3_SECRET_KEY:-}"
 TOR_ONION_REMOTE_PORT="${TOR_ONION_REMOTE_PORT:-}"
 WEB_FRONTEND_HOST="${WEB_FRONTEND_HOST:-}"
+WEB_FRONTEND_PORT="${WEB_FRONTEND_PORT:-80}"
 
 
 if [[ -z "$TOR_ONION_HOSTNAME" ||
@@ -41,7 +42,7 @@ cp /authorized_clients/*.auth "${tor_client_auth_dir}" || echo "Client auth is n
 
 cat <<EOF > /var/lib/tor/torrc
 HiddenServiceDir /var/lib/tor/${TOR_ONION_NAME}
-HiddenServicePort ${TOR_ONION_REMOTE_PORT} ${WEB_FRONTEND_HOST}:80
+HiddenServicePort ${TOR_ONION_REMOTE_PORT} ${WEB_FRONTEND_HOST}:${WEB_FRONTEND_PORT}
 SocksPort 0
 EOF
 
