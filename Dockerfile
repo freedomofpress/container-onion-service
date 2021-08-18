@@ -3,13 +3,13 @@ FROM debian:bullseye-slim@sha256:2a6fd917bbc6b8c0c4f5d05b2f831b27003dc24df486e3e
 
 RUN apt-get update && apt-get install -y curl gnupg2 apt-transport-https
 
-# See https://support.torproject.org/apt/tor-deb-repo/
-# TODO: we should explicitly pin a version here
-# For now, record the actual resulting version in version.txt
-RUN printf '%s https://deb.torproject.org/torproject.org bullseye main\n' deb deb-src > /etc/apt/sources.list.d/tor.list && \
-    curl -s https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | apt-key add - && \
+# Note that https://support.torproject.org/apt/tor-deb-repo/ has not yet been
+# updated for the deprecation of apt-key(8). Also, since we are only doing
+# this once, we don't install deb.torproject.org-keyring.
+RUN curl -sS -o /usr/share/keyrings/torproject.asc https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc && \
+    echo "deb [signed-by=/usr/share/keyrings/torproject.asc] https://deb.torproject.org/torproject.org bullseye main" >/etc/apt/sources.list.d/tor.list && \
     apt-get update && \
-    apt-get install -y tor deb.torproject.org-keyring
+    apt-get install -y tor=0.4.5.10-1~d11.bullseye+1
 
 # Deb package configures the "debian-tor" user
 USER debian-tor
