@@ -1,9 +1,10 @@
 # Onion Service
 
-To run, set the following (here are some example values):
+To run, set the following (here are some example values, fill in the
+`<...>`):
 
     TOR_ONION_NAME=myservice
-    TOR_ONION_HOSTNAME=<...>.onion
+    TOR_ONION_HOSTNAME=<base32...>.onion
     TOR_ONION_V3_PUBLIC_KEY=<base64...>
     TOR_ONION_V3_SECRET_KEY=<base64...>
     TOR_ONION_REMOTE_PORT=80
@@ -21,6 +22,11 @@ a key from accessing the service), mount some `*.auth` files into
 To create new service names and their associated keys, run:
 
     docker build -t onion-service.local .
-    docker run --rm --entrypoint tor-generate-onion onion-service.local
+    docker run --rm --entrypoint gen-service-keypair onion-service.local
 
-TODO: we should be able to generate client keys easily as well.
+## Generating a client auth key
+
+To generate a new client keypair (you can pass any number of service
+names):
+
+    ./gen-client-keypair <base32...>.onion
