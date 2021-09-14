@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -e
+set -u
+set -o pipefail
+
+
+pem_tmp="$(mktemp -t "review.XXXXXX")"
+cleanup() { rm -rf "$pem_tmp"; }
+trap 'exit $?' HUP INT QUIT TERM; trap cleanup EXIT
+
+
+pem_to_b32() {
+    grep -v ' KEY-----$' "$@" | base64 -d | tail -c 32 | base32 | tr -d =
+}
+
+
+for service in "${@:-replacemewiththerealservicenamebutwithoutthedotonionpart}"; do
+    openssl genpkey -algorithm x25519 -out "$pem_tmp"
+    prv_key="$(pem_to_b32 "$pem_tmp")"
+    pub_key="$(openssl pkey -in "$pem_tmp" -pubout | pem_to_b32)"
+
+    cat <<EOF
+Public key (for /authorized_clients/*.auth in container):
+    descriptor:x25519:$pub_key
+Private key (for \`tor\` ClientAuthDir):
+    ${service%.onion}:descriptor:x25519:${prv_key}
+Private key (for Tor Browser):
+    $prv_key
+EOF
+done

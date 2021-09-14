@@ -15,6 +15,6 @@ RUN curl -sS -o /usr/share/keyrings/torproject.asc https://deb.torproject.org/to
 USER debian-tor
 
 COPY tor-entrypoint /usr/local/bin/tor-entrypoint
-COPY tor-generate-onion /usr/local/bin/tor-generate-onion
+COPY gen-service-keypair /usr/local/bin/gen-service-keypair
 
 CMD ["/usr/local/bin/tor-entrypoint"]
