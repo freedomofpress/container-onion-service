@@ -1,31 +1,22 @@
-#!/bin/bash
+#!/bin/sh
 # Runs a Tor Onion Service based on env vars.
 # Intended for use in a container image.
 set -e
 set -u
-set -o pipefail
 
 
-TOR_ONION_NAME="${TOR_ONION_NAME:-onion1}"
-TOR_ONION_HOSTNAME="${TOR_ONION_HOSTNAME:-}"
-TOR_ONION_V3_PUBLIC_KEY="${TOR_ONION_V3_PUBLIC_KEY:-}"
-TOR_ONION_V3_SECRET_KEY="${TOR_ONION_V3_SECRET_KEY:-}"
-TOR_ONION_REMOTE_PORT="${TOR_ONION_REMOTE_PORT:-}"
-WEB_FRONTEND_HOST="${WEB_FRONTEND_HOST:-}"
-WEB_FRONTEND_PORT="${WEB_FRONTEND_PORT:-80}"
+echo "Tor config directory: ${TOR_ONION_NAME:=onion1}"
+echo "Hidden service hostname: ${TOR_ONION_HOSTNAME?}"
+echo "Hidden service port: ${TOR_ONION_REMOTE_PORT:=80}"
+echo "Public key: ${TOR_ONION_V3_PUBLIC_KEY?}"
+echo "Secret key: [not shown]"; : "${TOR_ONION_V3_SECRET_KEY?}"
+echo "Backend host: ${WEB_FRONTEND_HOST?}"
+echo "Backend port: ${WEB_FRONTEND_PORT:=80}"
 
-
-if [[ -z "$TOR_ONION_HOSTNAME" ||
-      -z "$TOR_ONION_V3_PUBLIC_KEY" ||
-      -z "$TOR_ONION_V3_SECRET_KEY" ||
-      -z "$TOR_ONION_REMOTE_PORT" ||
-      -z "$WEB_FRONTEND_HOST" ]]; then
-      echo "ERROR: Set TOR_ONION_HOSTNAME, TOR_ONION_V3_{PUBLIC,SECRET}_KEY, TOR_ONION_REMOTE_PORT, WEB_FRONTEND_HOST"
-      exit 1
-fi
-
+tor_config_file="/var/lib/tor/torrc"
 tor_service_dir="/var/lib/tor/${TOR_ONION_NAME}"
 tor_client_auth_dir="${tor_service_dir}/authorized_clients"
+
 mkdir -p "$tor_service_dir" "$tor_client_auth_dir"
 chmod 2700 "$tor_service_dir" "$tor_client_auth_dir"
 
@@ -40,15 +31,15 @@ chmod 0600 "$tor_seckey" "$tor_pubkey"
 # If we volume-mounted client auth keys, they are here
 cp /authorized_clients/*.auth "${tor_client_auth_dir}" || echo "Client auth is not enabled"
 
-cat <<EOF > /var/lib/tor/torrc
-HiddenServiceDir /var/lib/tor/${TOR_ONION_NAME}
-HiddenServicePort ${TOR_ONION_REMOTE_PORT} ${WEB_FRONTEND_HOST}:${WEB_FRONTEND_PORT}
-SocksPort 0
-EOF
+generate_config() {
+    echo "HiddenServiceDir /var/lib/tor/${TOR_ONION_NAME}"
+    echo "HiddenServicePort ${TOR_ONION_REMOTE_PORT} ${WEB_FRONTEND_HOST}:${WEB_FRONTEND_PORT}"
+    echo "SocksPort 0"
+}
 
+echo "Generating config file..."
+generate_config > "$tor_config_file"
 echo "Verifying config file..."
-tor -f /var/lib/tor/torrc --verify-config
-echo "Config file verified"
-
-echo "Serving Onion Service: http://${TOR_ONION_HOSTNAME}:${TOR_ONION_REMOTE_PORT}"
-exec tor -f /var/lib/tor/torrc
+tor -f "$tor_config_file" --verify-config
+echo "Starting tor process..."
+exec tor -f "$tor_config_file"
