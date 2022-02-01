@@ -1,5 +1,5 @@
-# sha256 as of 2021-12-14
-FROM debian:bullseye-slim@sha256:6ce27fb7f6d0c9c2da4d44481680ea47c0e8f818088372a7a67798fbab5ca322
+# sha256 as of 2022-01-28
+FROM debian:bullseye-slim@sha256:125f346eac7055d8e1de1b036b1bd39781be5bad3d36417c109729d71af0cd73
 
 RUN apt-get update && apt-get install -y curl gnupg2 apt-transport-https
 
@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y curl gnupg2 apt-transport-https
 RUN curl -sS -o /usr/share/keyrings/torproject.asc https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc && \
     echo "deb [signed-by=/usr/share/keyrings/torproject.asc] https://deb.torproject.org/torproject.org bullseye main" >/etc/apt/sources.list.d/tor.list && \
     apt-get update && \
-    apt-get install -y tor=0.4.6.8-1~d11.bullseye+1
+    apt-get install -y tor=0.4.6.9-1~d11.bullseye+1
 
 # Deb package configures the "debian-tor" user
 USER debian-tor
