@@ -1,5 +1,5 @@
-# sha256 as of 2022-01-28
-FROM debian:bullseye-slim@sha256:125f346eac7055d8e1de1b036b1bd39781be5bad3d36417c109729d71af0cd73
+# sha256 as of 2022-06-21
+FROM debian:bullseye-slim@sha256:89e9d812b34f393bddc3ff289f0036a3d9efc7e2f7289ec902c6427b69f39649
 
 RUN apt-get update && apt-get install -y curl gnupg2 apt-transport-https
 
