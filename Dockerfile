@@ -1,5 +1,5 @@
-# sha256 as of 2022-06-21
-FROM debian:bullseye-slim@sha256:89e9d812b34f393bddc3ff289f0036a3d9efc7e2f7289ec902c6427b69f39649
+# sha256 as of 2022-09-13
+FROM debian:bullseye-slim@sha256:83578646f4a0dd7d4eeac339562de64fb0d6700e85f48b7a83afb5df3886b38f
 
 RUN apt-get update && apt-get install -y curl gnupg2 apt-transport-https
 
@@ -8,7 +8,7 @@ RUN curl -sS https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512E
     | gpg --dearmor | tee /usr/share/keyrings/tor-archive-keyring.gpg > /dev/null && \
     echo "deb [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org bullseye main" >/etc/apt/sources.list.d/tor.list && \
     apt-get update && \
-    apt-get install -y tor=0.4.7.8-1~d11.bullseye+1
+    apt-get install -y tor=0.4.7.10-1~d11.bullseye+1
 
 # Deb package configures the "debian-tor" user
 USER debian-tor
