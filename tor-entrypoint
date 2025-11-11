@@ -34,7 +34,9 @@ cp /authorized_clients/*.auth "${tor_client_auth_dir}" || echo "Client auth is n
 generate_config() {
     echo "HiddenServiceDir /var/lib/tor/${TOR_ONION_NAME}"
     echo "HiddenServicePort ${TOR_ONION_REMOTE_PORT} ${WEB_FRONTEND_HOST}:${WEB_FRONTEND_PORT}"
-    echo "SocksPort 0"
+    echo "SocksPort 0 OnionTrafficOnly"
+    echo "Sandbox 1"
+    echo "HiddenServicePoWDefensesEnabled 1"
 }
 
 echo "Generating config file..."
