@@ -1,5 +1,5 @@
-# sha256 as of 2023-11-12
-FROM debian:bookworm-slim@sha256:ea5ad531efe1ac11ff69395d032909baf423b8b88e9aade07e11b40b2e5a1338
+# sha256 as of 2025-11-11
+FROM debian:bookworm-slim@sha256:936abff852736f951dab72d91a1b6337cf04217b2a77a5eaadc7c0f2f1ec1758
 
 RUN apt-get update && apt-get install -y curl gnupg2 apt-transport-https && \
     # Since we are only doing this once, we don't install deb.torproject.org-keyring.
