@@ -1,0 +1,24 @@
+---
+name: Publish
+
+on:
+  push:
+    branches: ["main"]
+
+env:
+  DEFAULT_BRANCH: main
+
+jobs:
+  build:
+    name: Build
+    uses: freedomofpress/actionslib/.github/workflows/oci-build.yaml@main
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+    with:
+      context: "."
+      containerfile: Dockerfile
+      registry: ghcr.io/freedomofpress/onion-service
+    secrets:
+      registry-password: ${{ secrets.GITHUB_TOKEN }}
