@@ -5,13 +5,36 @@ on:
   push:
     branches: ["main"]
 
-env:
-  DEFAULT_BRANCH: main
-
 jobs:
+
+  tags:
+    name: Tags
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+    - name: Determine tags
+      run: |
+        TAGS=$(cat version.txt)
+
+        debian_version=$(cat version.txt | cut -d '-' -f 1)
+        TAGS="$TAGS;$debian_version"
+
+        tor_version=$(cat version.txt | rev | cut -d '-' -f 2 | rev)
+        TAGS="$TAGS;$tor_version"
+
+        echo "tags=$TAGS" >>$GITHUB_OUTPUT
+
   build:
     name: Build
     uses: freedomofpress/actionslib/.github/workflows/oci-build.yaml@main
+    needs:
+    - tags
     permissions:
       contents: read
       actions: read
@@ -20,5 +43,6 @@ jobs:
       context: "."
       containerfile: Dockerfile
       registry: ghcr.io/freedomofpress/onion-service
+      tags: ${{ needs.tags.output.tags }}
     secrets:
       registry-password: ${{ secrets.GITHUB_TOKEN }}
