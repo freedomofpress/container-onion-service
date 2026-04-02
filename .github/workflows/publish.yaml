@@ -46,6 +46,6 @@ jobs:
       context: "."
       containerfile: Dockerfile
       registry: ghcr.io/freedomofpress/onion-service
-      tags: ${{ needs.tags.output.tags }}
+      tags: ${{ needs.tags.outputs.tags }}
     secrets:
       registry-password: ${{ secrets.GITHUB_TOKEN }}
