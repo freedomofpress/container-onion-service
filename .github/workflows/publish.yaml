@@ -19,6 +19,7 @@ jobs:
       with:
         persist-credentials: false
     - name: Determine tags
+      id: tags
       run: |
         TAGS=$(cat version.txt)
 
@@ -29,6 +30,8 @@ jobs:
         TAGS="$TAGS;$tor_version"
 
         echo "tags=$TAGS" >>$GITHUB_OUTPUT
+    outputs:
+      tags: ${{ steps.tags.outputs.tags }}
 
   build:
     name: Build
