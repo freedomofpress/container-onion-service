@@ -1,5 +1,5 @@
-# sha256 as of 2026-02-23
-FROM docker.io/library/debian:bookworm-slim@sha256:98f4b71de414932439ac6ac690d7060df1f27161073c5036a7553723881bffbe
+# sha256 as of 2026-03-25
+FROM docker.io/library/debian:bookworm-slim@sha256:f06537653ac770703bc45b4b113475bd402f451e85223f0f2837acbf89ab020a
 
 RUN apt-get update && apt-get install -y curl gnupg2 apt-transport-https && \
     # Since we are only doing this once, we don't install deb.torproject.org-keyring.
