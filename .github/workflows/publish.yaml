@@ -45,6 +45,7 @@ jobs:
       containerfile: Containerfile
       registry: ghcr.io/freedomofpress/onion-service
       tags: ${{ needs.versions.outputs.tor }}
+      add-latest-tag-on-default: true
       build-args: |
         VERSION_DEBIAN=${{ needs.versions.outputs.debian }}
         VERSION_TOR=${{ needs.versions.outputs.tor }}
