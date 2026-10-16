@@ -34,7 +34,7 @@ for tor_file in hostname hs_ed25519_public_key hs_ed25519_secret_key ; do
 done
 
 cat <<EOF
-Hostname: $(cat "${onion_dir}/hostname")
-Public key: $(cat "${onion_dir}/hs_ed25519_public_key" | base64 -w 0)
-Private key: $(cat "${onion_dir}/hs_ed25519_secret_key" | base64 -w 0)
+TOR_ONION_HOSTNAME=$(cat "${onion_dir}/hostname")
+TOR_ONION_V3_PUBLIC_KEY=$(cat "${onion_dir}/hs_ed25519_public_key" | base64 -w 0)
+TOR_ONION_V3_SECRET_KEY=$(cat "${onion_dir}/hs_ed25519_secret_key" | base64 -w 0)
 EOF
