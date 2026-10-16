@@ -44,7 +44,7 @@ jobs:
       packages: write
     with:
       context: "."
-      containerfile: Dockerfile
+      containerfile: Containerfile
       registry: ghcr.io/freedomofpress/onion-service
       tags: ${{ needs.tags.outputs.tags }}
     secrets:
