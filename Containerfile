@@ -1,5 +1,6 @@
-# sha256 as of 2026-10-12
-FROM docker.io/library/debian:trixie-slim@sha256:918311b7b6c4c6f68b232ba516584925f6c78ad82b6fd534b98979df6438e483
+ARG VERSION_DEBIAN
+
+FROM docker.io/library/debian:${VERSION_DEBIAN} AS prepare
 
 # The SHELL directive is only supported in Docker build mode, but
 # still worth including for that case
@@ -15,10 +16,15 @@ RUN apt-get update && \
         | gpg --dearmor \
         | tee /tor-archive-keyring.gpg > /dev/null
 
-FROM docker.io/library/debian:trixie-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS final
+FROM docker.io/library/debian:${VERSION_DEBIAN} AS final
+
+ARG VERSION_TOR
 
 COPY --from=prepare /tor-archive-keyring.gpg /usr/share/keyrings/tor-archive-keyring.gpg
 
+# The SHELL directive is only supported in Docker build mode, but
+# still worth including for that case
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
         apt-transport-https \
@@ -31,7 +37,8 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /usr/share/man/* && \
-    rm -rf /usr/share/doc/*
+    rm -rf /usr/share/doc/* && \
+    tor --version 2>&1 | grep "${VERSION_TOR}"
 
 # Deb package configures the "debian-tor" user
 # hadolint ignore=DL3066
