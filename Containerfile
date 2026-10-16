@@ -16,6 +16,8 @@ RUN apt-get update && \
         | gpg --dearmor \
         | tee /tor-archive-keyring.gpg > /dev/null
 
+ARG VERSION_DEBIAN
+
 FROM docker.io/library/debian:${VERSION_DEBIAN} AS final
 
 ARG VERSION_TOR
@@ -39,6 +41,11 @@ RUN apt-get update && \
     rm -rf /usr/share/man/* && \
     rm -rf /usr/share/doc/* && \
     tor --version 2>&1 | grep "${VERSION_TOR}"
+
+LABEL org.opencontainers.image.version="${VERSION_TOR}"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.vendor="Freedom of the Press Foundation"
+LABEL org.opencontainers.image.title="Onion Service"
 
 # Deb package configures the "debian-tor" user
 # hadolint ignore=DL3066
