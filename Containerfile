@@ -5,8 +5,15 @@ RUN apt-get update && apt-get install -y curl gnupg2 apt-transport-https && \
     # Since we are only doing this once, we don't install deb.torproject.org-keyring.
     curl -sS https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc \
     | gpg --dearmor | tee /usr/share/keyrings/tor-archive-keyring.gpg > /dev/null && \
-    echo "deb [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org trixie main" >/etc/apt/sources.list.d/tor.list && \
-    apt-get update && \
+    echo "deb [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org trixie main" >/etc/apt/sources.list.d/tor.list
+
+FROM docker.io/library/debian:trixie-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS final
+
+COPY --from=prepare /usr/share/keyrings/tor-archive-keyring.gpg /usr/share/keyrings/tor-archive-keyring.gpg
+COPY --from=prepare /etc/apt/sources.list.d/tor.list /etc/apt/sources.list.d/tor.list
+
+RUN apt-get update && \
+    apt-get install apt-transport-https && \
     apt-get install -y tor && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
