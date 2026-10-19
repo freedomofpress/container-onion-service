@@ -53,5 +53,6 @@ USER debian-tor
 
 COPY tor-entrypoint /usr/local/bin/tor-entrypoint
 COPY gen-service-keypair /usr/local/bin/gen-service-keypair
+COPY gen-client-keypair /usr/local/bin/gen-client-keypair
 
 CMD ["/usr/local/bin/tor-entrypoint"]
