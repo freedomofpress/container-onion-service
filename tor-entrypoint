@@ -4,9 +4,18 @@
 set -e
 set -u
 
-if [ ! -z "$TOR_ONION_V3_SECRET_KEY_FILE" ]; then
+if [ -n "${TOR_ONION_V3_SECRET_KEY_FILE:=}" ]; then
     TOR_ONION_V3_SECRET_KEY=$(cat "$TOR_ONION_V3_SECRET_KEY_FILE")
     unset TOR_ONION_V3_SECRET_KEY_FILE
+fi
+
+if [ "$IS_DEMO" = "true" ]; then
+    echo "WARNING: Running in demonstration mode: Tor configuration will not persist across container restarts!"
+    eval "$(gen-service-keypair)"
+    # Kills the temporary tor process started by the above script to
+    # generate the config. This lets the "real" tor process below run
+    # successfully, otherwise we get a "duplicate tor services" error
+    kill "$(pidof "$(command -v tor)")"
 fi
 
 echo "Tor config directory: ${TOR_ONION_NAME:=onion1}"

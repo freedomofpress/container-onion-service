@@ -1,0 +1,21 @@
+---
+networks:
+  hidden:
+
+services:
+  onion:
+    image: ghcr.io/freedomofpress/onion-service:latest
+    networks:
+    - hidden
+    environment:
+      WEB_FRONTEND_HOST: nginx
+      WEB_FRONTEND_PORT: "80"
+      # Never set this in production! When this is
+      # set the container will regenerate its onion hostname,
+      # private key, and public key on every restart.
+      IS_DEMO: "true"
+
+  nginx:
+    image: docker.io/library/nginx:latest
+    networks:
+    - hidden
