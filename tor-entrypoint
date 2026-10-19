@@ -4,6 +4,10 @@
 set -e
 set -u
 
+if [ ! -z "$TOR_ONION_V3_SECRET_KEY_FILE" ]; then
+    TOR_ONION_V3_SECRET_KEY=$(cat "$TOR_ONION_V3_SECRET_KEY_FILE")
+    unset TOR_ONION_V3_SECRET_KEY_FILE
+fi
 
 echo "Tor config directory: ${TOR_ONION_NAME:=onion1}"
 echo "Hidden service hostname: ${TOR_ONION_HOSTNAME?}"
@@ -12,6 +16,7 @@ echo "Public key: ${TOR_ONION_V3_PUBLIC_KEY?}"
 echo "Secret key: [not shown]"; : "${TOR_ONION_V3_SECRET_KEY?}"
 echo "Backend host: ${WEB_FRONTEND_HOST?}"
 echo "Backend port: ${WEB_FRONTEND_PORT:=80}"
+echo "Authorized clients directory: ${TOR_ONION_AUTHORIZED_CLIENTS_DIR:=/authorized_clients}"
 
 tor_config_file="/var/lib/tor/torrc"
 tor_service_dir="/var/lib/tor/${TOR_ONION_NAME}"
@@ -29,7 +34,7 @@ echo "$TOR_ONION_V3_SECRET_KEY" | base64 --decode > "$tor_seckey"
 chmod 0600 "$tor_seckey" "$tor_pubkey"
 
 # If we volume-mounted client auth keys, they are here
-cp /authorized_clients/*.auth "${tor_client_auth_dir}" || echo "Client auth is not enabled"
+cp "${TOR_ONION_AUTHORIZED_CLIENTS_DIR}/*.auth" "${tor_client_auth_dir}" || echo "Client auth is not enabled"
 
 generate_config() {
     echo "HiddenServiceDir /var/lib/tor/${TOR_ONION_NAME}"
