@@ -43,7 +43,7 @@ RUN apt-get update && \
     tor --version 2>&1 | grep "${VERSION_TOR}"
 
 LABEL org.opencontainers.image.version="${VERSION_TOR}"
-LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.licenses="AGPL-3.0"
 LABEL org.opencontainers.image.vendor="Freedom of the Press Foundation"
 LABEL org.opencontainers.image.title="Onion Service"
 

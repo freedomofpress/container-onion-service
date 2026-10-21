@@ -213,7 +213,7 @@ Complete configuration environment variable reference:
 ## Licenses
 
 This image is maintained by [The Freedom of the Press Foundation](https://freedom.press)
-and is available under the [MIT License](LICENSE.md).
+and is available under the [AGPL v3 License](LICENSE).
 
 Submit issues in the source repository at [https://github.com/freedomofpress/container-onion-service/](https://github.com/freedomofpress/container-onion-service/).
 
