@@ -9,13 +9,9 @@ if [ -n "${TOR_ONION_V3_SECRET_KEY_FILE:=}" ]; then
     unset TOR_ONION_V3_SECRET_KEY_FILE
 fi
 
-if [ "$IS_DEMO" = "true" ]; then
+if [ "${IS_DEMO:-false}" = "true" ]; then
     echo "WARNING: Running in demonstration mode: Tor configuration will not persist across container restarts!"
     eval "$(gen-service-keypair)"
-    # Kills the temporary tor process started by the above script to
-    # generate the config. This lets the "real" tor process below run
-    # successfully, otherwise we get a "duplicate tor services" error
-    kill "$(pidof "$(command -v tor)")"
 fi
 
 echo "Tor config directory: ${TOR_ONION_NAME:=onion1}"
@@ -43,7 +39,7 @@ echo "$TOR_ONION_V3_SECRET_KEY" | base64 --decode > "$tor_seckey"
 chmod 0600 "$tor_seckey" "$tor_pubkey"
 
 # If we volume-mounted client auth keys, they are here
-cp "${TOR_ONION_AUTHORIZED_CLIENTS_DIR}/*.auth" "${tor_client_auth_dir}" || echo "Client auth is not enabled"
+cp "${TOR_ONION_AUTHORIZED_CLIENTS_DIR}"/"*.auth" "${tor_client_auth_dir}" || echo "Client auth is not enabled"
 
 generate_config() {
     echo "HiddenServiceDir /var/lib/tor/${TOR_ONION_NAME}"
