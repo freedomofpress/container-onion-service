@@ -2,7 +2,7 @@
 
 A container that runs a [Tor Onion Service](https://community.torproject.org/onion-services/)
 as a proxy in front of another web application to allow a standard HTTP/S web service to 
-be exposed as an Onion Service on the Tor network.
+be exposed as an onion service on the Tor network.
 
 [![CI](https://github.com/freedomofpress/container-onion-service/workflows/CI/badge.svg?event=push)](https://github.com/freedomofpress/container-onion-service/actions/)
 [![Tor Version](https://img.shields.io/gitlab/v/tag/tpo%2Fcore%2Ftor?gitlab_url=https%3A%2F%2Fgitlab.torproject.org&label=Tor&color=%2359316b
@@ -12,18 +12,38 @@ be exposed as an Onion Service on the Tor network.
 [![License](https://img.shields.io/github/license/freedomofpress/container-onion-service)](LICENSE.md)
 
 > [!IMPORTANT]
-> Connecting to any Onion Service requires using the 
+> Connecting to any onion service requires using the 
 > [The Tor Browser](https://download.torproject.org/tor-browser-for-desktop/). Please
 > ensure it is installed before continuing.
 
 - [Onion Service](#onion-service)
+  - [Image Tags](#image-tags)
   - [Quick Start](#quick-start)
-  - [Configuring](#configuring)
-    - [Setup](#setup)
+  - [Configuration](#configuration)
+    - [Initial Setup](#initial-setup)
     - [Restricting Access](#restricting-access)
-    - [Image Tags](#image-tags)
     - [Reference](#reference)
   - [Licenses](#licenses)
+
+## Image Tags
+
+The official registry for this image is located at `ghcr.io/freedomofpress/onion-service`.
+
+The image is only built for the `amd64` architecture.
+
+The `latest` tag will always point to the image built with the latest version of Tor.
+See the [Tor repository tags](https://gitlab.torproject.org/tpo/core/tor/-/tags) for
+specific version information.
+
+Version tags are be provided for each version of Tor, for example the tag `0.4.9.14`
+corresponds to the [`tor-0.4.9.14`](https://gitlab.torproject.org/tpo/core/tor/-/tags/tor-0.4.9.14)
+tag in the Tor repository.
+
+The image is periodically rebuilt to incorporate updates from the latest Debian base image.
+
+> [!NOTE]
+> Prior to `0.4.9.14` tags were also available for specific Debian versions. These are no
+> longer maintained and should be removed from any configurations.
 
 ## Quick Start
 
@@ -42,15 +62,16 @@ docker compose -f compose.demo.yaml logs onion | grep hostname
 3. Copy the onion hostname into Tor Browser to see the Nginx welcome page
 
 > [!WARNING]
-> The demo server will regenerate its private key and onion hostname every time it is
-> restarted making it inappropriate for real world usage. See the [#configuring](#configuration)
-> section for information on setting up a real onion service.
+> The demo server will regenerate its private key and onion hostname every time
+> it is restarted making it inappropriate for real world usage. See the
+> [#configuration](#configuration) section for information on setting up a real 
+> onion service.
 
-## Configuring
+## Configuration
 
-### Setup
+### Initial Setup
 
-Running an Onion Service requires a keypair with a derived onion hostname. This 
+Running an onion service requires a keypair with a derived onion hostname. This 
 container includes a script that can be used to generate these values automatically. 
 To generate the keypair and derive the hostname run the following command:
 
@@ -67,42 +88,53 @@ TOR_ONION_V3_PUBLIC_KEY=<base64...>
 TOR_ONION_V3_SECRET_KEY=<base64...>
 ```
 
-Also required to launch the onion service is to inform it where the clear-net
-site being proxied can be reached. This may be a public hostname (ex: `mysite.example.com`),
+The onion service container also needs to be informed where it can connect to the
+clear-net site being proxied. This may be a public hostname (ex: `mysite.example.com`),
 an internal hostname (ex: `mysite.example.local`), or a container service name (ex:
-`mystack_nginx`) depending on the exact setup. Note that the provided hostname for the site 
-needs to be accessible from where the container is running, which may be different from the
-hostname clear-net clients use to connect to the site.
+`mystack_nginx`) depending on the exact setup. Note that the provided hostname for
+the site needs to be accessible from where the container is running, which may be
+different from the hostname clear-net clients use to connect to the site.
 
-To inform the onion service about the proxied site set the `WEB_FRONTEND_HOST` environment 
-variable to the hostname of the clear-net site and optionally `WEB_FRONTEND_PORT` to the port
-where the clear-net site application is listening (if unspecified it will default to port `80`).
+To inform the onion service container about the proxied site set the `WEB_FRONTEND_HOST` 
+environment variable to the hostname of the clear-net site and optionally
+`WEB_FRONTEND_PORT` to the port where the clear-net site application is listening
+(if unspecified it will default to port `80`).
 
 Now the onion service container can be started:
 
 ```bash
-podman run --name onion-service --detach ghcr.io/freedomofpress/onion-service:latest \
+podman run --name onion-service --detach \
     --env TOR_ONION_HOSTNAME=<base32...>.onion \
     --env TOR_ONION_V3_PUBLIC_KEY=<base64...> \
     --env TOR_ONION_V3_SECRET_KEY=<base64...> \
     --env WEB_FRONTEND_HOST=mysite.example.com \
-    --env WEB_FRONTEND_PORT=80
+    --env WEB_FRONTEND_PORT=80 \
+    ghcr.io/freedomofpress/onion-service:latest
 ```
 
 Once the container is started, copy the value of the `TOR_ONION_HOSTNAME` environment 
 variable into the address bar of [Tor Browser](https://download.torproject.org/tor-browser-for-desktop/)
 and connect to the proxied clear-net site over the Tor network!
 
+> [!NOTE]
+> Once a web service is exposed as an onion service, the clear-net web service can
+> provide the `Onion-Location` header to point compatible clear-net clients to the
+> Tor onion service. See the 
+> [Tor documentation](https://community.torproject.org/onion-services/advanced/onion-location/) 
+> for more information.
+
 ### Restricting Access
 
 By default all onion services are publicly available to all users on the Tor network. To 
-restrict access to an onion service to only pre-approved users [Tor client authorization](https://community.torproject.org/onion-services/advanced/client-auth/) 
+restrict access to the onion service in the container to only pre-approved users 
+[Tor client authorization](https://community.torproject.org/onion-services/advanced/client-auth/) 
 needs to be configured. Each client that is approved to access an onion service will need
 a client keypair generated for them.
 
-> [!IMPORTANT]
-> The client keypair used for client authorization is different than the service keypair
-> used by the onion service itself. Never share the service keypair with a client.
+> [!CAUTION]
+> The _"client keypair"_ used for client authorization is different than the _"service keypair"_ 
+> used by the onion service and generated in the [#initial-setup](#initial-setup) section. 
+> **Never share the service keypair!**
 
 To generate a new client keypair for an onion service run the following command, replacing
 the value of `ONION_HOSTNAME` with the hostname of the onion service that the client needs
@@ -112,10 +144,6 @@ to access:
 podman run --rm ghcr.io/freedomofpress/onion-service \
     gen-client-keypair <ONION_HOSTNAME>.onion
 ```
-
-> [!NOTE] 
-> A single client keypair can be generated that grants a client access to multiple onion
-> services by passing multiple onion hostnames to the `gen-client-keypair` command.
 
 This command will give output that looks like this:
 
@@ -150,32 +178,20 @@ Now when clients connect to the onion service in Tor Browser they will be prompt
 provide a key to access the site. Clients must provide the `CLIENT_PRIVATE_KEY_BROWSER`
 value when prompted to access the site.
 
-> [!WARNING]
-> The above workflow is provided for demonstration purposes only. Generating client
-> keypairs centrally and then distributing the private keys to actual clients is
-> **not recommended**. Instead clients should generate their own keypairs and send the
-> public key _only_ to the onion service administrator to be added to the onion service
-> container.
-
-### Image Tags
-
-The official registry for this image is located at `ghcr.io/freedomofpress/onion-service`.
-
-The image is only built for the `amd64` architecture.
-
-The `latest` tag will always point to the image built with the latest version of Tor.
-See the [Tor repository tags](https://gitlab.torproject.org/tpo/core/tor/-/tags) for
-specific version information.
-
-Version tags are be provided for each version of Tor, for example the tag `0.4.9.14`
-corresponds to the [`tor-0.4.9.14`](https://gitlab.torproject.org/tpo/core/tor/-/tags/tor-0.4.9.14)
-tag in the Tor repository.
-
-The image is periodically rebuilt to incorporate updates from the latest Debian base image.
-
 > [!NOTE]
-> Prior to `0.4.9.14` tags were also available for specific Debian versions. These are no
-> longer maintained and should be removed from any configurations.
+> If a client needs access to multiple onion services, a single client keypair can be 
+> generated that grants access to all of them by passing multiple onion service names
+> to the script, like `gen-client-keypair <service1>.onion <service2>.onion ...`.
+> 
+> To successfully access the services the client keypair's public key will need to be 
+> added to each onion service container.
+
+> [!WARNING]
+> This section is provided for demonstration purposes only.
+> 
+> It is **not recommended** to have onion service administrators generate client keypairs
+> and then distribute the private keys to end users. Instead end users should generate 
+> their own client keypair and send _only_ the public key to the onion service administrator.
 
 ### Reference
 
