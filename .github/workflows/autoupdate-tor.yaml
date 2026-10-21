@@ -1,5 +1,5 @@
 ---
-name: Autoupdate:TOR
+name: Autoupdate:Tor
 
 on:
   # Allows job to be manually triggered
@@ -24,15 +24,15 @@ env:
   LOCAL_VERSION_FILE: version-tor.txt
   TOR_GITLAB_API: https://gitlab.torproject.org/api/v4/projects/426
   TOR_GITLAB_CHANGELOG: https://gitlab.com/torproject/tor/-/blob/main/ChangeLog
-  PR_TEMPLATE_TITLE: "[AutoBot] Update TOR to `{0}`"
+  PR_TEMPLATE_TITLE: "[AutoBot] Update Tor to `{0}`"
   PR_TEMPLATE_BODY: |
-    ### Update to Latest TOR Release
+    ### Update to Latest Tor Release
 
     > [!WARNING]
     > This PR is generated automatically. Review the changelog, inspect
     > the diff, and test the built image before merging.
 
-    - Update TOR from `{0}` to `{1}`
+    - Update Tor from `{0}` to `{1}`
     - [Changelog]({2})
 
     ### Testing and Review
@@ -72,7 +72,7 @@ jobs:
 
           echo "version=$tor_version" >>$GITHUB_OUTPUT
 
-          echo "Latest TOR version: $tor_version"
+          echo "Latest Tor version: $tor_version"
 
       - name: Fetch current version
         id: current
@@ -81,7 +81,7 @@ jobs:
 
           echo "version=$current" >>$GITHUB_OUTPUT
 
-          echo "Current TOR version: $current"
+          echo "Current Tor version: $current"
 
     outputs:
       current: ${{ steps.current.outputs.version }}
@@ -141,7 +141,7 @@ jobs:
           files: |
             ${{ needs.check.outputs.file }}
           message: |
-            (autobot) Update TOR from ${{ needs.check.outputs.current }} to ${{ needs.check.outputs.latest }}
+            (autobot) Update Tor from ${{ needs.check.outputs.current }} to ${{ needs.check.outputs.latest }}
 
             Changelog: ${{ env.TOR_GITLAB_CHANGELOG }}
           gpg-key: ${{ secrets.FPF_INFRABOT_GPG_KEY }}
