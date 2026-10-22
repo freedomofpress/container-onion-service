@@ -1,0 +1,4 @@
+---
+# Don't require pinning exact apt versions
+ignored:
+- DL3008

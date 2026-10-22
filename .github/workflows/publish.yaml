@@ -7,45 +7,69 @@ on:
 
 jobs:
 
-  tags:
-    name: Tags
+  versions:
+    name: Fetch Versions
     runs-on: ubuntu-latest
     permissions:
       contents: read
       actions: read
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       with:
         persist-credentials: false
-    - name: Determine tags
-      id: tags
+
+    - name: Fetch versions
+      id: versions
       run: |
-        TAGS=$(cat version.txt)
+        version_debian=$(cat version-debian.txt)
+        version_tor=$(cat version-tor.txt)
 
-        debian_version=$(cat version.txt | cut -d '-' -f 1)
-        TAGS="$TAGS;$debian_version"
-
-        tor_version=$(cat version.txt | rev | cut -d '-' -f 2 | rev)
-        TAGS="$TAGS;$tor_version"
-
-        echo "tags=$TAGS" >>$GITHUB_OUTPUT
+        echo "debian=$version_debian" >>$GITHUB_OUTPUT
+        echo "tor=$version_tor" >>$GITHUB_OUTPUT
     outputs:
-      tags: ${{ steps.tags.outputs.tags }}
+      tor: ${{ steps.versions.outputs.tor }}
+      debian: ${{ steps.versions.outputs.debian }}
 
   build:
     name: Build
     uses: freedomofpress/actionslib/.github/workflows/oci-build.yaml@main
     needs:
-    - tags
+    - versions
     permissions:
       contents: read
       actions: read
       packages: write
     with:
       context: "."
-      containerfile: Dockerfile
+      containerfile: Containerfile
       registry: ghcr.io/freedomofpress/onion-service
-      tags: ${{ needs.tags.outputs.tags }}
+      tags: ${{ needs.versions.outputs.tor }}
+      add-latest-tag-on-default: true
+      build-args: |
+        VERSION_DEBIAN=${{ needs.versions.outputs.debian }}
+        VERSION_TOR=${{ needs.versions.outputs.tor }}
     secrets:
       registry-password: ${{ secrets.GITHUB_TOKEN }}
+
+  tag:
+    name: Push Tag
+    runs-on: ubuntu-latest
+    needs:
+    - build # only run if the build was successful
+    permissions:
+      contents: write
+      actions: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: true
+    
+    - name: Add tag
+      run: |
+        tor_version=$(cat version-tor.txt)
+
+        git tag "$tor_version"
+
+        git push --tags --force

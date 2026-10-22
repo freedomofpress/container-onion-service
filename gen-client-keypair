@@ -21,11 +21,8 @@ for service in "${@:-replacemewiththerealservicenamebutwithoutthedotonionpart}";
     pub_key="$(openssl pkey -in "$pem_tmp" -pubout | pem_to_b32)"
 
     cat <<EOF
-Public key (for /authorized_clients/*.auth in container):
-    descriptor:x25519:$pub_key
-Private key (for \`tor\` ClientAuthDir):
-    ${service%.onion}:descriptor:x25519:${prv_key}
-Private key (for Tor Browser):
-    $prv_key
+CLIENT_PUBLIC_KEY=descriptor:x25519:$pub_key
+CLIENT_PRIVATE_KEY=${service%.onion}:descriptor:x25519:${prv_key}
+CLIENT_PRIVATE_KEY_BROWSER=$prv_key
 EOF
 done

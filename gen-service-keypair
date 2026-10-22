@@ -27,6 +27,10 @@ function wait_for_file() {
 # Start tor service, backgrounded, then wait for conf files.
 # The tor process will create the necessary files when it starts.
 nohup tor -f "$tmp_torrc" --hush > /dev/null 2>&1 &
+tor_pid=$!
+# Reap tor on exit, so the DataDirectory lock is free for the next tor process.
+cleanup() { kill "$tor_pid" 2>/dev/null || true; wait "$tor_pid" || true; rm -f "$tmp_torrc"; }
+trap cleanup EXIT
 
 for tor_file in hostname hs_ed25519_public_key hs_ed25519_secret_key ; do
     f="${onion_dir}/${tor_file}"
@@ -34,7 +38,7 @@ for tor_file in hostname hs_ed25519_public_key hs_ed25519_secret_key ; do
 done
 
 cat <<EOF
-Hostname: $(cat "${onion_dir}/hostname")
-Public key: $(cat "${onion_dir}/hs_ed25519_public_key" | base64 -w 0)
-Private key: $(cat "${onion_dir}/hs_ed25519_secret_key" | base64 -w 0)
+TOR_ONION_HOSTNAME=$(cat "${onion_dir}/hostname")
+TOR_ONION_V3_PUBLIC_KEY=$(cat "${onion_dir}/hs_ed25519_public_key" | base64 -w 0)
+TOR_ONION_V3_SECRET_KEY=$(cat "${onion_dir}/hs_ed25519_secret_key" | base64 -w 0)
 EOF
