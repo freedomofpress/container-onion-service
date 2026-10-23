@@ -39,7 +39,7 @@ echo "$TOR_ONION_V3_SECRET_KEY" | base64 --decode > "$tor_seckey"
 chmod 0600 "$tor_seckey" "$tor_pubkey"
 
 # If we volume-mounted client auth keys, they are here
-cp "${TOR_ONION_AUTHORIZED_CLIENTS_DIR}"/"*.auth" "${tor_client_auth_dir}" || echo "Client auth is not enabled"
+cp "${TOR_ONION_AUTHORIZED_CLIENTS_DIR}"/*.auth "${tor_client_auth_dir}" || echo "Client auth is not enabled"
 
 generate_config() {
     echo "HiddenServiceDir /var/lib/tor/${TOR_ONION_NAME}"

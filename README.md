@@ -4,7 +4,7 @@ A container that runs a [Tor Onion Service](https://community.torproject.org/oni
 as a proxy in front of another web application to allow a standard HTTP/S web service to 
 be exposed as an onion service on the Tor network.
 
-[![CI](https://github.com/freedomofpress/container-onion-service/workflows/CI/badge.svg?event=push)](https://github.com/freedomofpress/container-onion-service/actions/)
+[![CI/CD](https://github.com/freedomofpress/container-onion-service/actions/workflows/publish.yaml/badge.svg)](https://github.com/freedomofpress/container-onion-service/actions/workflows/publish.yaml)
 [![Tor Version](https://img.shields.io/gitlab/v/tag/tpo%2Fcore%2Ftor?gitlab_url=https%3A%2F%2Fgitlab.torproject.org&label=Tor&color=%2359316b
 )](https://gitlab.torproject.org/tpo/core/tor)
 [![Image Version](https://img.shields.io/github/v/tag/freedomofpress/container-onion-service?label=Image&color=%232aae48
