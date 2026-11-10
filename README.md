@@ -35,7 +35,7 @@ The `latest` tag will always point to the image built with the latest version of
 See the [Tor repository tags](https://gitlab.torproject.org/tpo/core/tor/-/tags) for
 specific version information.
 
-Version tags are be provided for each version of Tor, for example the tag `0.4.9.14`
+Version tags are provided for each version of Tor. For example the tag `0.4.9.14`
 corresponds to the [`tor-0.4.9.14`](https://gitlab.torproject.org/tpo/core/tor/-/tags/tor-0.4.9.14)
 tag in the Tor repository.
 
@@ -63,7 +63,7 @@ docker compose -f compose.demo.yaml logs onion | grep hostname
 
 > [!WARNING]
 > The demo server will regenerate its private key and onion hostname every time
-> it is restarted making it inappropriate for real world usage. See the
+> it restarts, making it inappropriate for real-world usage. See the
 > [#configuration](#configuration) section for information on setting up a real 
 > onion service.
 
@@ -117,7 +117,7 @@ variable into the address bar of [Tor Browser](https://download.torproject.org/t
 and connect to the proxied clear-net site over the Tor network!
 
 > [!NOTE]
-> Once a web service is exposed as an onion service, the clear-net web service can
+> Once a web service is exposed as an onion service, the clear-net web service may
 > provide the `Onion-Location` header to point compatible clear-net clients to the
 > Tor onion service. See the 
 > [Tor documentation](https://community.torproject.org/onion-services/advanced/onion-location/) 
@@ -132,7 +132,7 @@ needs to be configured. Each client that is approved to access an onion service 
 a client keypair generated for them.
 
 > [!CAUTION]
-> The _"client keypair"_ used for client authorization is different than the _"service keypair"_ 
+> A _"client keypair"_ used for client authorization is different than the _"service keypair"_ 
 > used by the onion service and generated in the [#initial-setup](#initial-setup) section. 
 > **Never share the service keypair!**
 
@@ -165,13 +165,14 @@ container and then recreate it with the below command that mounts the client pub
 file into the `authorized_clients` directory:
 
 ```bash
-podman run --name onion-service --detach ghcr.io/freedomofpress/onion-service:latest \
+podman run --name onion-service --detach \
     --env TOR_ONION_HOSTNAME=<base32...>.onion \
     --env TOR_ONION_V3_PUBLIC_KEY=<base64...> \
     --env TOR_ONION_V3_SECRET_KEY=<base64...> \
     --env WEB_FRONTEND_HOST=mysite.example.com \
     --env WEB_FRONTEND_PORT=80 \
-    --volume $(pwd)/my_client.auth:/authorized_clients/my_client.auth
+    --volume $(pwd)/my_client.auth:/authorized_clients/my_client.auth \
+    ghcr.io/freedomofpress/onion-service:latest
 ```
 
 Now when clients connect to the onion service in Tor Browser they will be prompted to
@@ -181,10 +182,8 @@ value when prompted to access the site.
 > [!NOTE]
 > If a client needs access to multiple onion services, a single client keypair can be 
 > generated that grants access to all of them by passing multiple onion service names
-> to the script, like `gen-client-keypair <service1>.onion <service2>.onion ...`.
-> 
-> To successfully access the services the client keypair's public key will need to be 
-> added to each onion service container.
+> to the script. The public key will then need to be added to all of the onion services
+> to allow the client to authenticate.
 
 > [!WARNING]
 > This section is provided for demonstration purposes only.
