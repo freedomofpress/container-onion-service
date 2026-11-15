@@ -66,9 +66,21 @@ jobs:
       - name: Fetch latest tag
         id: latest
         run: |
-          tor_tag=$(curl "$TOR_GITLAB_API/repository/tags" | jq -r '.[0].name')
+          # Only consider stable release tags (e.g. "tor-0.4.9.16"). Alpha and rc
+          # tags (e.g. "tor-0.4.10.1-alpha") and unrelated tags are ignored.
+          tor_tags=$(curl --fail --silent --show-error "$TOR_GITLAB_API/repository/tags?per_page=100")
 
-          tor_version=$(echo "$tor_tag" | cut -d "-" -f 2)
+          tor_version=$(echo "$tor_tags" \
+            | jq -r '.[].name' \
+            | grep -E '^tor-[0-9]+(\.[0-9]+)+$' \
+            | sed 's/^tor-//' \
+            | sort -V \
+            | tail -n 1)
+
+          if [ -z "$tor_version" ]; then
+            echo "::error::Could not determine the latest stable Tor version"
+            exit 1
+          fi
 
           echo "version=$tor_version" >>$GITHUB_OUTPUT
 
