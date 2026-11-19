@@ -11,7 +11,10 @@ tmp_torrc="$(mktemp)"
 tor_log="$(mktemp)"
 # Seconds to wait for tor to write the service files before giving up
 timeout="${GEN_SERVICE_KEYPAIR_TIMEOUT:-60}"
-onion_dir="/var/lib/tor/onion"
+# Generate into a fresh directory on every run, so that keys left over from an
+# earlier run can never be returned as a newly generated identity
+onion_parent="$(mktemp -d)"
+onion_dir="${onion_parent}/onion"
 cat <<EOF > "$tmp_torrc"
 HiddenServiceDir $onion_dir
 HiddenServicePort 1234 127.0.0.1:1234
@@ -48,7 +51,7 @@ function wait_for_file() {
 nohup tor -f "$tmp_torrc" --hush > "$tor_log" 2>&1 &
 tor_pid=$!
 # Reap tor on exit, so the DataDirectory lock is free for the next tor process.
-cleanup() { kill "$tor_pid" 2>/dev/null || true; wait "$tor_pid" || true; rm -f "$tmp_torrc" "$tor_log"; }
+cleanup() { kill "$tor_pid" 2>/dev/null || true; wait "$tor_pid" || true; rm -f "$tmp_torrc" "$tor_log"; rm -rf "$onion_parent"; }
 trap cleanup EXIT
 
 for tor_file in hostname hs_ed25519_public_key hs_ed25519_secret_key ; do
