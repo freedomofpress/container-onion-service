@@ -40,7 +40,9 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /usr/share/man/* && \
     rm -rf /usr/share/doc/* && \
-    tor --version 2>&1 | grep "${VERSION_TOR}"
+    # Exact match on the whole banner line, so a prefix, empty or regex value
+    # cannot pass for a different installed version
+    tor --version 2>&1 | grep -Fx "Tor version ${VERSION_TOR}."
 
 LABEL org.opencontainers.image.version="${VERSION_TOR}"
 LABEL org.opencontainers.image.licenses="AGPL-3.0"

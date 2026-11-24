@@ -70,6 +70,11 @@ jobs:
           debian_tag=$(cat $LOCAL_VERSION_FILE | cut -d "@" -f 1)
           latest_sha=$(docker manifest inspect "$DEBIAN_IMAGE:$debian_tag" | jq -r '.manifests[] | select((.platform.architecture == "amd64") and (.platform.os == "linux")) | .digest')
 
+          if [[ ! "$latest_sha" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "::error::Could not determine a single amd64 digest for $DEBIAN_IMAGE:${debian_tag} (got: '${latest_sha}')"
+            exit 1
+          fi
+
           echo "version=${debian_tag}@${latest_sha}" >>$GITHUB_OUTPUT
           echo "Latest SHA for $DEBIAN_IMAGE:${debian_tag}: ${latest_sha}"
 

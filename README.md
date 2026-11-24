@@ -180,10 +180,11 @@ provide a key to access the site. Clients must provide the `CLIENT_PRIVATE_KEY_B
 value when prompted to access the site.
 
 > [!NOTE]
-> If a client needs access to multiple onion services, a single client keypair can be 
-> generated that grants access to all of them by passing multiple onion service names
-> to the script. The public key will then need to be added to all of the onion services
-> to allow the client to authenticate.
+> If a client needs access to multiple onion services, multiple onion service names
+> can be passed to the script. A separate client keypair is generated for each onion
+> service, and the keypairs are printed in the order the names were given. Each public
+> key needs to be added to its corresponding onion service to allow the client to
+> authenticate.
 
 > [!WARNING]
 > This section is provided for demonstration purposes only.

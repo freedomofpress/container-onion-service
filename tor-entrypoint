@@ -11,7 +11,10 @@ fi
 
 if [ "${IS_DEMO:-false}" = "true" ]; then
     echo "WARNING: Running in demonstration mode: Tor configuration will not persist across container restarts!"
-    eval "$(gen-service-keypair)"
+    # Assign first so that a failed generation aborts the entrypoint (set -e)
+    demo_keys="$(gen-service-keypair)"
+    eval "$demo_keys"
+    unset demo_keys
 fi
 
 echo "Tor config directory: ${TOR_ONION_NAME:=onion1}"
@@ -37,6 +40,12 @@ echo "$TOR_ONION_V3_PUBLIC_KEY" | base64 --decode > "$tor_pubkey"
 echo "$TOR_ONION_V3_SECRET_KEY" | base64 --decode > "$tor_seckey"
 
 chmod 0600 "$tor_seckey" "$tor_pubkey"
+
+# The mounted directory is the source of truth for client auth. Clear any keys
+# left over from a previous start (the container's writable layer, or a volume
+# on /var/lib/tor, survives a restart) so that removing a client's .auth file
+# from the mounted directory revokes that client.
+rm -f "${tor_client_auth_dir}"/*.auth
 
 # If we volume-mounted client auth keys, they are here
 cp "${TOR_ONION_AUTHORIZED_CLIENTS_DIR}"/*.auth "${tor_client_auth_dir}" || echo "Client auth is not enabled"
